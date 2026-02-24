@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Ambulance, Bed, Stethoscope, Microscope, Users, Zap, ArrowRight, Check } from 'lucide-react';
+import { Ambulance, Bed, Stethoscope, Microscope, Users, Zap, ArrowRight, Check, Instagram, ExternalLink} from 'lucide-react';
 
 export default function ServicesSection() {
   const services = [
@@ -46,6 +46,30 @@ export default function ServicesSection() {
       color: 'from-pink-500 to-pink-600',
     },
   ];
+
+  const instagramPost = [
+    {
+      title: "Postingan Instagram 1",
+      href:"https://www.instagram.com/reel/DSW8ipeAe2C/?igsh=dnBpbDltanpmZXd5/embed",
+      
+    },
+        {
+      title: "Postingan Instagram 2",
+      href:"https://www.instagram.com/p/DU5IKYsAbDF/?igsh=MTVpb2EwM2FhYW9hcQ==/embed",
+   
+    },
+        {
+      title: "Postingan Instagram 3",
+      href:"https://www.instagram.com/reel/DUQEe7hkWkS/?igsh=MXZuNjB6YjNlemM0dA==/embed",
+
+    },
+
+  ];
+
+  const getEmbedUrl = (postUrl) => {
+    const normalized = postUrl.endsWith('/') ? postUrl : `${postUrl}/`;
+    return `${normalized}embed`;
+  };
 
   return (
     <section className="py-20 sm:py-32 bg-gradient-to-b from-white via-neutral-light to-white">
@@ -97,37 +121,40 @@ export default function ServicesSection() {
           })}
         </div>
 
-        {/* CTA Section */}
-        <div className="relative rounded-3xl overflow-hidden">
-          <div className="absolute inset-0 opacity-95" style={{backgroundImage: 'linear-gradient(to right, #005ba3, #003d7a, #005ba3)'}}></div>
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-secondary rounded-full blur-3xl"></div>
-            <div className="absolute bottom-0 left-0 w-72 h-72 bg-secondary/50 rounded-full blur-3xl"></div>
-          </div>
-          
-          <div className="relative z-10 p-8 sm:p-16 text-center text-white">
-            <h3 className="text-4xl sm:text-5xl font-serif font-bold mb-6">
-              Siap Melayani Kesehatan Anda
-            </h3>
-            <p className="text-lg text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-              Tim medis profesional kami siap memberikan solusi kesehatan terbaik dengan teknologi terkini dan layanan yang ramah
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+       {/* instagram reels */}
+        <div className="relative rounded-3xl overflow-hidden border border-primary/15 bg-white p-8 sm:p-12 shadow-xl">
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
+              <div>
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-semibold mb-4">
+                  <Instagram size={16}/>
+                  Feed Instagram
+                </div>
+                <h3 className="text-3xl sm:text-4xl font serif- font-bold text-foreground mb-2">Update Terbaru RS Catharina</h3>
+                <p className="text-foreground/70 max-w-2xl">Tampilkan posting terbaru Instagram untuk berbagi edukasi kesehatan, kegiatan rumah sakit, dan informasi layanan terbaru.</p>
+              </div>
               <Link
-                href="/layanan"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-secondary hover:bg-secondary text-primary-dark font-bold text-lg rounded-xl shadow-xl hover:shadow-2xl transition-all group"
+                href="https://www.instagram.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition-colors"
               >
-                Jelajahi Layanan
-                <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link
-                href="#hubungi"
-                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/20 hover:bg-white/30 text-white font-bold text-lg rounded-xl backdrop-blur-sm border-2 border-white/30 transition-all"
-              >
-                Hubungi Sekarang
+                Ikuti Instagram
+                <ExternalLink size={18} />
               </Link>
             </div>
-          </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {instagramPost.map((post, index) => (
+                <div key={index} className="p-4 flex justify-center">
+                  <div className="bg-white rounded-xl p-4">
+                    <blockquote
+                      className="instagram-media"
+                      data-instgrm-permalink={post.href}
+                      data-instgrm-version="14"
+                      />
+                  </div>
+                </div> 
+              ))}
+            </div>
         </div>
       </div>
     </section>

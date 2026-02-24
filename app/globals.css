@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -353,5 +352,12 @@
   /* Smooth transitions */
   .transition-smooth {
     @apply transition-all duration-300 ease-out;
+  }
+
+  /* instagram position */
+  .instagram-media {
+    margin: 0 auto;
+    width: 100%;
+    max-width: 100%;
   }
 }

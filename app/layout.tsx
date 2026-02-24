@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from 'next'
 import { Playfair_Display, Lato } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
+import Script from "next/script"
 
 const playfair = Playfair_Display({ 
   subsets: ['latin'],
@@ -53,6 +54,10 @@ export default function RootLayout({
     <html lang="id" className={`${playfair.variable} ${lato.variable}`}>
       <body className={`font-sans antialiased bg-background text-foreground`}>
         {children}
+        <Script
+          src="https://www.instagram.com/embed.js"
+          strategy="lazyOnload"
+        />
         <Analytics />
       </body>
     </html>
