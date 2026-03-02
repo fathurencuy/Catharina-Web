@@ -5,24 +5,29 @@ const COOKIE_VALUE = 'authenticated';
 
 export function middleware(request) {
   const { pathname } = request.nextUrl;
-
-  if (!pathname.startsWith('/admin')) {
-    return NextResponse.next();
+  
+  // Proteksi halaman admin (kecuali login)
+  if (pathname.startsWith('/admin') && pathname !== '/admin/login') {
+    const session = request.cookies.get(COOKIE_NAME);
+    
+    // Kalau tidak ada session atau value salah, redirect ke login
+    if (!session || session.value !== COOKIE_VALUE) {
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
   }
-
-  if (pathname.startsWith('/admin/login')) {
-    return NextResponse.next();
+  
+  // Kalau sudah login tapi coba akses login page, redirect ke dashboard
+  if (pathname === '/admin/login') {
+    const session = request.cookies.get(COOKIE_NAME);
+    
+    if (session?.value === COOKIE_VALUE) {
+      return NextResponse.redirect(new URL('/admin', request.url));
+    }
   }
-
-  const session = request.cookies.get(COOKIE_NAME)?.value;
-  if (session === COOKIE_VALUE) {
-    return NextResponse.next();
-  }
-
-  const loginUrl = new URL('/admin/login', request.url);
-  return NextResponse.redirect(loginUrl);
+  
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/admin/:path*'],
+  matcher: '/admin/:path*',
 };

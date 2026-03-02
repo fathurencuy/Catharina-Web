@@ -2,10 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Lock, Mail, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [form, setForm] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
   const [status, setStatus] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -22,17 +25,19 @@ export default function AdminLoginPage() {
       });
 
       const data = await response.json();
-      if (!response.ok) {
-        setStatus(data?.message || 'Login gagal');
-        setLoading(false);
-        return;
-      }
 
-      setStatus('Login berhasil. Mengarahkan ke dashboard admin...');
-      router.push('/admin');
-      router.refresh();
-    } catch {
-      setStatus('Terjadi kendala jaringan. Coba lagi.');
+      // Cek berdasarkan API Anda yang return { ok: true }
+      if (response.ok && data.ok) {
+        // Login berhasil - paksa reload untuk apply cookie
+        window.location.href = '/admin';
+      } else {
+        // Login gagal - tampilkan error
+        setError(data?.message || 'Login gagal');
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Terjadi kendala jaringan. Coba lagi.');
       setLoading(false);
     }
   };
