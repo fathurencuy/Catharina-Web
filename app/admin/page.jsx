@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Lock, Mail, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Lock, Mail, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
@@ -24,7 +24,7 @@ export default function AdminLoginPage() {
       const data = await response.json();
 
       if (response.ok && data.ok) {
-        // Redirect ke dashboard (bukan /admin lagi!)
+        // Redirect ke dashboard 
         window.location.href = '/admin/dashboard';
       } else {
         setError(data?.message || 'Login gagal');
@@ -40,14 +40,11 @@ export default function AdminLoginPage() {
     <main className="min-h-screen bg-gradient-to-br from-primary/10 via-white to-secondary/10 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-primary/80 rounded-3xl mb-4 shadow-lg">
-            <Lock className="text-white" size={40} />
-          </div>
           <h1 className="text-4xl font-serif font-bold text-foreground mb-2">Login Admin</h1>
           <p className="text-foreground/70">Rumah Sakit Catharina 1914</p>
         </div>
 
-        <div className="w-full bg-white rounded-2xl border border-border p-8 shadow-2xl">
+        <div className="w-full bg-white rounded-2xl border border-border p-8 hover:shadow-2xl transition-all group">
           <p className="text-foreground/70 text-sm mb-6 text-center">
             Masukkan akun Gmail dan password admin yang benar untuk membuka dashboard.
           </p>
@@ -115,8 +112,8 @@ export default function AdminLoginPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <a href="/" className="text-sm text-primary hover:underline font-medium">
-              ← Kembali ke Beranda
+            <a href="/" className=" inline-flex items-center gap-2 text-primary hover:underline font-medium">
+              <ArrowLeft size={16}/> Kembali ke Beranda
             </a>
           </div>
         </div>

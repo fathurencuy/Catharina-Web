@@ -80,7 +80,7 @@ export default function Header() {
               </Link>
             ))}
             <Link
-              href="/admin/login"
+              href="/admin"
               className="block px-6 py-3 text-white rounded-xl hover:shadow-xl transition-all text-center font-bold mt-6 transform hover:scale-105"
               style={{backgroundImage: 'linear-gradient(to right, #005ba3, #003d7a)'}}
               onClick={() => setIsMenuOpen(false)}

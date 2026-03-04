@@ -50,7 +50,7 @@ export default function AdminLayout({ children }) {
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                   isActive
-                    ? 'bg-primary text-white shadow-sm'
+                    ? 'bg-secondary-light text-primary shadow-sm'
                     : 'text-foreground hover:bg-neutral-light'
                 }`}
               >
@@ -105,7 +105,7 @@ export default function AdminLayout({ children }) {
                     onClick={() => setSidebarOpen(false)}
                     className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
                       isActive
-                        ? 'bg-primary text-white shadow-sm'
+                        ? 'bg-secondary-light text-primary shadow-sm'
                         : 'text-foreground hover:bg-neutral-light'
                     }`}
                   >

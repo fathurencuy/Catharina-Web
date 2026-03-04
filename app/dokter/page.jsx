@@ -2,7 +2,10 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import DoctorCard from '@/components/DoctorCard';
 import { Stethoscope } from 'lucide-react';
-import { readCollection } from '@/lib/dataStore';
+import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma'
+
+
 
 export const metadata = {
   title: 'Dokter | Rumah Sakit Catharina 1914',
@@ -10,7 +13,7 @@ export const metadata = {
 };
 
 export default async function DokterPage(){
-  const doctors = await readCollection('doctors');
+  const doctors = await prisma.doctor.findMany();
 
   return (
     <>

@@ -1,66 +1,25 @@
 import { NextResponse } from 'next/server';
-import { getPool } from '@/lib/db';
-import { randomUUID } from 'crypto';
+import prisma from '@/lib/prisma';
 
-export async function GET() {
+// DELETE - Hapus message
+export async function DELETE(request, { params }) {
   try {
-    const pool = getPool();
 
-    const [rows] = await pool.query(
-      'SELECT * FROM messages ORDER BY created_at DESC'
-    );
+    const { id } = await params;
+    const messageId = parseInt(id);
 
-    return NextResponse.json(rows);
+    await prisma.message.delete({
+      where: { id: messageId },
+    });
 
+    return NextResponse.json({ 
+      success: true,
+      message: 'Message deleted' 
+    });
   } catch (error) {
+    console.error('Error deleting message:', error);
     return NextResponse.json(
-      { message: 'Database error' },
-      { status: 500 }
-    );
-  }
-}
-
-export async function POST(request) {
-  try {
-    const body = await request.json();
-
-    if (!body?.name || !body?.email || !body?.message) {
-      return NextResponse.json(
-        { message: 'nama, email, dan pesan wajib diisi' },
-        { status: 400 }
-      );
-    }
-
-    const pool = getPool();
-    const id = randomUUID();
-
-    await pool.query(
-      `INSERT INTO messages 
-       (id, name, email, phone, message) 
-       VALUES (?, ?, ?, ?, ?)`,
-      [
-        id,
-        body.name,
-        body.email,
-        body.phone || '',
-        body.message
-      ]
-    );
-
-    return NextResponse.json(
-      {
-        id,
-        name: body.name,
-        email: body.email,
-        phone: body.phone || '',
-        message: body.message
-      },
-      { status: 201 }
-    );
-
-  } catch (error) {
-    return NextResponse.json(
-      { message: 'Database error' },
+      { error: 'Failed to delete message' },
       { status: 500 }
     );
   }

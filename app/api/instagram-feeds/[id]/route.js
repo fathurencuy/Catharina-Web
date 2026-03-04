@@ -1,63 +1,49 @@
 import { NextResponse } from 'next/server';
-import { getPool } from '@/lib/db';
+import prisma from '@/lib/prisma';
 
+// PUT - Update feed
 export async function PUT(request, { params }) {
   try {
+   
+    const { id } = await params;
+    const feedId = parseInt(id);
+    
     const body = await request.json();
-    const pool = getPool();
 
-    const [result] = await pool.query(
-      `UPDATE instagram_feeds 
-       SET title = COALESCE(?, title),
-           href = COALESCE(?, href),
-           thumbnail = COALESCE(?, thumbnail)
-       WHERE id = ?`,
-      [body.title, body.href, body.thumbnail, params.id]
-    );
+    const feed = await prisma.instagramFeed.update({
+      where: { id: feedId },
+      data: body,
+    });
 
-    if (result.affectedRows === 0) {
-      return NextResponse.json(
-        { message: 'Data feed tidak ditemukan' },
-        { status: 404 }
-      );
-    }
-
-    const [rows] = await pool.query(
-      'SELECT * FROM instagram_feeds WHERE id = ?',
-      [params.id]
-    );
-
-    return NextResponse.json(rows[0]);
-
+    return NextResponse.json(feed);
   } catch (error) {
+    console.error('Error updating feed:', error);
     return NextResponse.json(
-      { message: 'Database error' },
+      { error: 'Failed to update feed' },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(_request, { params }) {
+// DELETE - Hapus feed
+export async function DELETE(request, { params }) {
   try {
-    const pool = getPool();
 
-    const [result] = await pool.query(
-      'DELETE FROM instagram_feeds WHERE id = ?',
-      [params.id]
-    );
+    const { id } = await params;
+    const feedId = parseInt(id);
 
-    if (result.affectedRows === 0) {
-      return NextResponse.json(
-        { message: 'Data feed tidak ditemukan' },
-        { status: 404 }
-      );
-    }
+    await prisma.instagramFeed.delete({
+      where: { id: feedId },
+    });
 
-    return NextResponse.json({ ok: true });
-
+    return NextResponse.json({ 
+      success: true,
+      message: 'Feed deleted' 
+    });
   } catch (error) {
+    console.error('Error deleting feed:', error);
     return NextResponse.json(
-      { message: 'Database error' },
+      { error: 'Failed to delete feed' },
       { status: 500 }
     );
   }

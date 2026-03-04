@@ -1,65 +1,43 @@
 import { NextResponse } from 'next/server';
-import { getPool } from '@/lib/db';
-import { randomUUID } from 'crypto';
+import prisma from '@/lib/prisma';
 
+// GET - Ambil semua messages
 export async function GET() {
   try {
-    const pool = getPool();
+    const messages = await prisma.message.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
 
-    const [rows] = await pool.query(
-      'SELECT * FROM messages ORDER BY created_at DESC'
-    );
-
-    return NextResponse.json(rows);
+    return NextResponse.json(messages);
   } catch (error) {
+    console.error('Error fetching messages:', error);
     return NextResponse.json(
-      { message: 'Database error' },
+      { error: 'Failed to fetch messages' },
       { status: 500 }
     );
   }
 }
 
+// POST - Tambah message baru
 export async function POST(request) {
   try {
     const body = await request.json();
+    const { name, email, phone, message } = body;
 
-    if (!body?.name || !body?.email || !body?.phone || !body?.message) {
-      return NextResponse.json(
-        { message: 'Semua field wajib diisi' },
-        { status: 400 }
-      );
-    }
-
-    const pool = getPool();
-    const id = randomUUID();
-
-    await pool.query(
-      `INSERT INTO messages 
-       (id, name, email, phone, message) 
-       VALUES (?, ?, ?, ?, ?)`,
-      [
-        id,
-        body.name,
-        body.email,
-        body.phone,
-        body.message
-      ]
-    );
-
-    return NextResponse.json(
-      {
-        id,
-        name: body.name,
-        email: body.email,
-        phone: body.phone,
-        message: body.message
+    const newMessage = await prisma.message.create({
+      data: {
+        name,
+        email,
+        phone,
+        message,
       },
-      { status: 201 }
-    );
+    });
 
+    return NextResponse.json(newMessage);
   } catch (error) {
+    console.error('Error creating message:', error);
     return NextResponse.json(
-      { message: 'Database error' },
+      { error: 'Failed to create message' },
       { status: 500 }
     );
   }

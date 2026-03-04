@@ -31,7 +31,7 @@ export default function MessagesPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-border p-6">
+      <div className="bg-white rounded-2xl border border-border p-6 hover:shadow-lg transition-all group">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-bold">Total Pesan: {messages.length}</h2>
         </div>

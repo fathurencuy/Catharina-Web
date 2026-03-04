@@ -8,8 +8,8 @@ export async function POST(request) {
   try {
     const body = await request.json();
 
-    const adminEmail = process.env.ADMIN_EMAIL || 'catharina2026@gmail.com';
-    const adminPassword = process.env.ADMIN_PASSWORD || 'admin123';
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
 
     if (!body?.email || !body?.password) {
       return NextResponse.json(
@@ -25,9 +25,9 @@ export async function POST(request) {
       );
     }
 
-    // ✅ PERBAIKAN: Pakai cookieStore, bukan cookies() lagi
+    // Pakai cookieStore,
     const cookieStore = await cookies();
-    cookieStore.set(COOKIE_NAME, COOKIE_VALUE, {  // ← Ganti cookies() jadi cookieStore
+    cookieStore.set(COOKIE_NAME, COOKIE_VALUE, { 
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',

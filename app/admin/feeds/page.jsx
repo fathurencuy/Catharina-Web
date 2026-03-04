@@ -1,49 +1,130 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Instagram, Plus, Trash2, Edit } from 'lucide-react';
+import { Instagram, Plus, Trash2, Upload, X, Image as ImageIcon, Edit } from 'lucide-react';
 
 export default function FeedsPage() {
   const [feeds, setFeeds] = useState([]);
   const [feedForm, setFeedForm] = useState({ title: '', href: '', thumbnail: '' });
+  const [uploadedImage, setUploadedImage] = useState(null);
+  const [uploading, setUploading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const loadFeeds = async () => {
     const res = await fetch('/api/instagram-feeds');
     if (res.ok) setFeeds(await res.json());
   };
 
+  
+
   useEffect(() => {
     loadFeeds();
   }, []);
 
+  // Handle file upload
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validasi tipe file
+    if (!file.type.startsWith('image/')) {
+      alert('Hanya file gambar yang diperbolehkan!');
+      return;
+    }
+
+    // Validasi ukuran (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Ukuran file maksimal 5MB!');
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setUploadedImage(data.url);
+        setFeedForm({ ...feedForm, thumbnail: data.url });
+      } else {
+        alert(data.error || 'Upload gagal');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Terjadi kesalahan saat upload');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = () => {
+    setUploadedImage(null);
+    setFeedForm({ ...feedForm, thumbnail: '' });
+  };
+
   const addFeed = async (e) => {
     e.preventDefault();
-    await fetch('/api/instagram-feeds', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(feedForm),
-    });
-    setFeedForm({ title: '', href: '', thumbnail: '' });
-    loadFeeds();
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/instagram-feeds', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(feedForm),
+      });
+
+      if (res.ok) {
+        setFeedForm({ title: '', href: '', thumbnail: '' });
+        setUploadedImage(null);
+        loadFeeds();
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Gagal menambah feed');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Terjadi kesalahan');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const deleteFeed = async (id) => {
-    if (!confirm('Yakin ingin menghapus feed ini?')) return;
-    await fetch(`/api/instagram-feeds/${id}`, { method: 'DELETE' });
-    loadFeeds();
+  if (!confirm('Yakin ingin menghapus feed ini?')) return;
+  await fetch(`/api/instagram-feeds/${id}`, { method: 'DELETE' });
+  loadFeeds();
   };
 
   const updateFeedThumbnail = async (id, thumbnail) => {
-    await fetch(`/api/instagram-feeds/${id}`, {
+  if (!thumbnail || thumbnail.trim() === '') return;
+  
+  try {
+    const res = await fetch(`/api/instagram-feeds/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ thumbnail }),
     });
-    loadFeeds();
-  };
+
+    if (res.ok) {
+      loadFeeds();
+      // Optional: show success message
+      // alert('Thumbnail berhasil diupdate!');
+    }
+  } catch (error) {
+    console.error('Error updating thumbnail:', error);
+  }
+};
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8">
+    <div className="max-w-5xl mx-auto space-y-8 ">
       <div className="flex items-center gap-3">
         <Instagram className="text-primary" size={32} />
         <div>
@@ -53,7 +134,7 @@ export default function FeedsPage() {
       </div>
 
       {/* Form Tambah Feed */}
-      <div className="bg-white rounded-2xl border border-border p-6">
+      <div className="bg-white rounded-2xl border border-border p-6 hover:shadow-lg transition-all group">
         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
           <Plus size={24} className="text-primary" />
           Tambah Feed Baru
@@ -81,29 +162,69 @@ export default function FeedsPage() {
             />
           </div>
 
+          {/* Upload gambar */}
           <div>
-            <label className="block text-sm font-semibold mb-2">URL Thumbnail Gambar</label>
-            <input
-              className="w-full border border-border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="https://..."
-              value={feedForm.thumbnail}
-              onChange={(e) => setFeedForm({ ...feedForm, thumbnail: e.target.value })}
-              required
-            />
+            <label className="block text-sm font-semibold mb-2">Thumbnail Gambar *</label>
+            
+            {!uploadedImage ? (
+              <div className="border-2 border-dashed border-border rounded-lg p-6 text-center hover:border-primary transition-colors">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  id="file-upload"
+                  disabled={uploading}
+                />
+                <label
+                  htmlFor="file-upload"
+                  className="cursor-pointer flex flex-col items-center gap-3"
+                >
+                  <div className="p-4 bg-neutral-light rounded-full">
+                    <Upload className="text-primary" size={32} />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-foreground">
+                      {uploading ? 'Uploading...' : 'Klik untuk upload gambar'}
+                    </p>
+                    <p className="text-sm text-foreground/70 mt-1">
+                      JPG, PNG, atau WebP (Max 5MB)
+                    </p>
+                  </div>
+                </label>
+              </div>
+            ) : (
+              <div className="relative border border-border rounded-lg p-4">
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+                <img
+                  src={uploadedImage}
+                  alt="Preview"
+                  className="w-full h-48 object-cover rounded-lg"
+                />
+                <p className="text-sm text-foreground/70 mt-2 text-center">
+                  Gambar berhasil diupload
+                </p>
+              </div>
+            )}
           </div>
-
-          <button
-            type="submit"
-            className="w-full bg-primary text-white rounded-lg px-6 py-3 font-semibold hover:bg-primary/90 transition-all flex items-center justify-center gap-2"
-          >
-            <Plus size={20} />
-            Tambah Feed
-          </button>
+                <button
+                  type="submit"
+                  className="w-full bg-secondary-light text-black rounded-lg px-6 py-3 font-semibold hover:bg-[#c5dbe8] border transition-all duration-200 flex items-center justify-center gap-2 shadow-lg"
+                >
+                  <Plus size={20} />
+                  Tambah Feed
+                </button>
         </form>
       </div>
 
       {/* List Feeds */}
-      <div className="bg-white rounded-2xl border border-border p-6">
+      <div className="bg-white rounded-2xl border border-border p-6 hover:shadow-lg transition-all group">
         <h2 className="text-xl font-bold mb-4">Daftar Feed ({feeds.length})</h2>
         
         {feeds.length === 0 ? (
@@ -134,7 +255,7 @@ export default function FeedsPage() {
                   </button>
                 </div>
 
-                <div className="flex gap-2 items-center">
+                {/* <div className="flex gap-2 items-center">
                   <Edit size={16} className="text-foreground/50" />
                   <input
                     className="flex-1 border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
@@ -142,7 +263,7 @@ export default function FeedsPage() {
                     onBlur={(e) => updateFeedThumbnail(feed.id, e.target.value)}
                     placeholder="URL Thumbnail"
                   />
-                </div>
+                </div> */}
 
                 {feed.thumbnail && (
                   <img

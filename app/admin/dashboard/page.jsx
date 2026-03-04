@@ -71,7 +71,7 @@ export default function AdminDashboard() {
             <Link
               key={card.title}
               href={card.href}
-              className="bg-white rounded-2xl border border-border p-6 hover:shadow-lg transition-all group"
+              className="bg-white rounded-2xl border-2 border-border p-6 hover:shadow-lg transition-all group"
             >
               <div className="flex items-start justify-between mb-4">
                 <div
@@ -89,7 +89,7 @@ export default function AdminDashboard() {
         })}
       </div>
 
-      <div className="bg-white rounded-2xl border border-border p-6">
+      <div className="bg-white rounded-2xl border-2 border-border p-6">
         <h2 className="text-2xl font-bold mb-4">Aktivitas Terbaru</h2>
         <p className="text-foreground/70">Fitur aktivitas terbaru akan segera hadir...</p>
       </div>

@@ -1,118 +1,49 @@
 import { NextResponse } from 'next/server';
-import { getPool } from '@/lib/db';
+import prisma from '@/lib/prisma';
 
+// PUT - Update doctor
 export async function PUT(request, { params }) {
   try {
+
+    const { id } = await params;
+    const doctorId = parseInt(id);
+    
     const body = await request.json();
-    const pool = getPool();
 
-    const connection = await pool.getConnection();
-    await connection.beginTransaction();
+    const doctor = await prisma.doctor.update({
+      where: { id: doctorId },
+      data: body,
+    });
 
-    try {
-      //Update doctors table
-      const [result] = await connection.query(
-        `UPDATE doctors 
-         SET name = COALESCE(?, name),
-             specialization = COALESCE(?, specialization),
-             experience = COALESCE(?, experience),
-             education = COALESCE(?, education)
-         WHERE id = ?`,
-        [
-          body.name,
-          body.specialization,
-          body.experience !== undefined ? Number(body.experience) : null,
-          body.education,
-          params.id
-        ]
-      );
-
-      if (result.affectedRows === 0) {
-        await connection.rollback();
-        return NextResponse.json(
-          { message: 'Dokter tidak ditemukan' },
-          { status: 404 }
-        );
-      }
-
-      // Update schedule (jika dikirim)
-      if (Array.isArray(body.schedule)) {
-        // hapus schedule lama
-        await connection.query(
-          'DELETE FROM doctor_schedules WHERE doctor_id = ?',
-          [params.id]
-        );
-
-        // insert schedule baru
-        for (const item of body.schedule) {
-          await connection.query(
-            'INSERT INTO doctor_schedules (doctor_id, day, time) VALUES (?, ?, ?)',
-            [params.id, item.day, item.time]
-          );
-        }
-      }
-
-      await connection.commit();
-      connection.release();
-
-      return NextResponse.json({ message: 'Update berhasil' });
-
-    } catch (err) {
-      await connection.rollback();
-      connection.release();
-      throw err;
-    }
-
+    return NextResponse.json(doctor);
   } catch (error) {
+    console.error('Error updating doctor:', error);
     return NextResponse.json(
-      { message: 'Database error' },
+      { error: 'Failed to update doctor' },
       { status: 500 }
     );
   }
 }
 
-export async function DELETE(_request, { params }) {
+// DELETE - Hapus doctor
+export async function DELETE(request, { params }) {
   try {
-    const pool = getPool();
-    const connection = await pool.getConnection();
 
-    await connection.beginTransaction();
+    const { id } = await params;
+    const doctorId = parseInt(id);
 
-    try {
-      // hapus schedule dulu (foreign key safety)
-      await connection.query(
-        'DELETE FROM doctor_schedules WHERE doctor_id = ?',
-        [params.id]
-      );
+    await prisma.doctor.delete({
+      where: { id: doctorId },
+    });
 
-      const [result] = await connection.query(
-        'DELETE FROM doctors WHERE id = ?',
-        [params.id]
-      );
-
-      if (result.affectedRows === 0) {
-        await connection.rollback();
-        connection.release();
-        return NextResponse.json(
-          { message: 'Dokter tidak ditemukan' },
-          { status: 404 }
-        );
-      }
-
-      await connection.commit();
-      connection.release();
-
-      return NextResponse.json({ ok: true });
-
-    } catch (err) {
-      await connection.rollback();
-      connection.release();
-      throw err;
-    }
-
+    return NextResponse.json({ 
+      success: true,
+      message: 'Doctor deleted successfully' 
+    });
   } catch (error) {
+    console.error('Error deleting doctor:', error);
     return NextResponse.json(
-      { message: 'Database error' },
+      { error: 'Failed to delete doctor' },
       { status: 500 }
     );
   }
